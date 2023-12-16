@@ -1,5 +1,5 @@
 # Java IRC Bot
-Zero dependency pure Java library for implementing your own NIO IRC Clients / Bots / Crawlers / Loggers.
+Zero dependency pure Java library for implementing your own NIO IRC Client / Bot / Crawler / Logger.
 
 ## 💡 Requirements
 + Java Runtime 1.8 **or higher**
