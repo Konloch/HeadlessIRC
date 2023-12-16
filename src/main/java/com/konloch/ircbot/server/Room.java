@@ -1,5 +1,10 @@
 package com.konloch.ircbot.server;
 
+import com.konloch.ircbot.listener.IRCJoin;
+import com.konloch.ircbot.listener.IRCLeave;
+import com.konloch.ircbot.listener.IRCPrivateMessage;
+import com.konloch.ircbot.listener.IRCRoomMessage;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -128,6 +133,42 @@ public class Room
 	public void send(String message)
 	{
 		messageQueue.add(message);
+	}
+	
+	public void onJoin(IRCJoin join)
+	{
+		//filter listener events to only call for this server
+		server.getBot().getListeners().onJoin(event ->
+		{
+			if(event.getRoom() != this)
+				return;
+			
+			join.join(event);
+		});
+	}
+	
+	public void onLeave(IRCLeave leave)
+	{
+		//filter listener events to only call for this server
+		server.getBot().getListeners().onLeave(event ->
+		{
+			if(event.getRoom() != this)
+				return;
+			
+			leave.leave(event);
+		});
+	}
+	
+	public void onMessage(IRCRoomMessage roomMessage)
+	{
+		//filter listener events to only call for this server
+		server.getBot().getListeners().onRoomMessage(event ->
+		{
+			if(event.getRoom() != this)
+				return;
+			
+			roomMessage.message(event);
+		});
 	}
 	
 	public Server getServer()
