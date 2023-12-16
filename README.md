@@ -29,25 +29,28 @@ IRCBot bot = new IRCBot("your nick goes here", "Java IRC Client");
 Server server = bot.join("irc.freenode.net");
 ```
 
-2) Using the server object, you can now join rooms.
+2) Using the server object, you can now join channels.
 ```java
-Room room1 = server.join("#example-room-1");
-Room room2 = server.join("#example-room-2");
+Channel channel1 = server.join("#example-channel-1");
+Channel channel2 = server.join("#example-channel-2");
 ```
 
-3) You can now handle events to receive and send messages.
+3) Now you can queue messages directly.
 ```java
-room1.send("Hello room #1");
-room2.send("Hello room #2");
+channel1.send("Hello channel #1");
+channel2.send("Hello channel #2");
+```
 
-//handle incoming room messages
-server.onRoomMessage(event -> {
-	Room room = event.getRoom();
+4) You can define message listeners to receive and send messages.
+```java
+//handle incoming channel messages
+server.onChannelMessage(event -> {
+	Channel channel = event.getChannel();
 	User user = event.getUser();
 	String msg = event.getMessage();
 
 	if(msg.toLowerCase().contains("hello")) {
-		room.send("Hello, this is a room message");
+		channel.send("Hello, this is a channel message");
 		user.send("Hello, this is a private message");
 	}
 });
@@ -61,20 +64,20 @@ server.onPrivateMessage(event -> {
 		user.send("Hello, this is a private message");
 });
 
-//handle room join updates
+//handle channel join updates
 server.onJoin(event -> {
-	Room room = event.getRoom();
+	Channel channel = event.getChannel();
 	User user = event.getUser();
 
-	System.out.println("JOIN: " + room.getName() + "[" + room.getUsers().size() + "] " + user.getNickname());
+	System.out.println("JOIN: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
 });
 
-//handle room leave updates
+//handle channel leave updates
 server.onLeave(event -> {
-	Room room = event.getRoom();
+	Channel channel = event.getChannel();
 	User user = event.getUser();
 
-	System.out.println("QUIT: " + room.getName() + "[" + room.getUsers().size() + "] " + user.getNickname());
+	System.out.println("QUIT: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
 });
 ```
 
