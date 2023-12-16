@@ -41,7 +41,7 @@ channel1.send("Hello channel #1");
 channel2.send("Hello channel #2");
 ```
 
-## 💻 How To Use Events
+## ⌨️ How To Use Events
 There are three types of event listener: Channel, Server, and Global.
 
 1) **Channel message listeners**
