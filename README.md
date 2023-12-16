@@ -41,7 +41,41 @@ channel1.send("Hello channel #1");
 channel2.send("Hello channel #2");
 ```
 
-4) You can define server message listeners to receive and send messages. *This uses the **server** object*
+## 💻 How To Use Events
+There are three types of event listener: Channel, Server, and Global.
+
+1) **Channel message listeners**
+```java
+//handle incoming channel messages
+channel1.onMessage(event -> {
+	Channel channel = event.getChannel();
+	User user = event.getUser();
+	String msg = event.getMessage();
+
+	if(msg.toLowerCase().contains("hello")) {
+		channel.send("Hello, this is a channel message");
+		user.send("Hello, this is a private message");
+	}
+});
+
+//handle channel join updates
+channel1.onJoin(event -> {
+	Channel channel = event.getChannel();
+	User user = event.getUser();
+
+	System.out.println("JOIN: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
+});
+
+//handle channel leave updates
+channel1.onLeave(event -> {
+	Channel channel = event.getChannel();
+	User user = event.getUser();
+
+	System.out.println("QUIT: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
+});
+```
+
+2) **Server message listeners**
 ```java
 //handle incoming channel messages
 server.onChannelMessage(event -> {
@@ -81,38 +115,7 @@ server.onLeave(event -> {
 });
 ```
 
-5) You can define channel message listeners to receive and send messages. *This uses the **channel** object*
-```java
-//handle incoming channel messages
-channel1.onMessage(event -> {
-	Channel channel = event.getChannel();
-	User user = event.getUser();
-	String msg = event.getMessage();
-
-	if(msg.toLowerCase().contains("hello")) {
-		channel.send("Hello, this is a channel message");
-		user.send("Hello, this is a private message");
-	}
-});
-
-//handle channel join updates
-channel1.onJoin(event -> {
-	Channel channel = event.getChannel();
-	User user = event.getUser();
-
-	System.out.println("JOIN: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
-});
-
-//handle channel leave updates
-channel1.onLeave(event -> {
-	Channel channel = event.getChannel();
-	User user = event.getUser();
-
-	System.out.println("QUIT: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
-});
-```
-
-6) You can define global message listeners to receive and send messages. *This uses the **bot** object*
+3) **Global message listeners**
 ```java
 
 //handle incoming channel messages
