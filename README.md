@@ -41,7 +41,7 @@ channel1.send("Hello channel #1");
 channel2.send("Hello channel #2");
 ```
 
-4) You can define message listeners to receive and send messages.
+4) You can define server message listeners to receive and send messages. *This uses the **server** object*
 ```java
 //handle incoming channel messages
 server.onChannelMessage(event -> {
@@ -74,6 +74,78 @@ server.onJoin(event -> {
 
 //handle channel leave updates
 server.onLeave(event -> {
+	Channel channel = event.getChannel();
+	User user = event.getUser();
+
+	System.out.println("QUIT: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
+});
+```
+
+5) You can define channel message listeners to receive and send messages. *This uses the **channel** object*
+```java
+//handle incoming channel messages
+channel1.onMessage(event -> {
+	Channel channel = event.getChannel();
+	User user = event.getUser();
+	String msg = event.getMessage();
+
+	if(msg.toLowerCase().contains("hello")) {
+		channel.send("Hello, this is a channel message");
+		user.send("Hello, this is a private message");
+	}
+});
+
+//handle channel join updates
+channel1.onJoin(event -> {
+	Channel channel = event.getChannel();
+	User user = event.getUser();
+
+	System.out.println("JOIN: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
+});
+
+//handle channel leave updates
+channel1.onLeave(event -> {
+	Channel channel = event.getChannel();
+	User user = event.getUser();
+
+	System.out.println("QUIT: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
+});
+```
+
+6) You can define global message listeners to receive and send messages. *This uses the **bot** object*
+```java
+
+//handle incoming channel messages
+bot.onChannelMessage(event -> {
+	Channel channel = event.getChannel();
+	User user = event.getUser();
+	String msg = event.getMessage();
+
+	if(msg.toLowerCase().contains("hello")) {
+		channel.send("Hello, this is a channel message");
+		user.send("Hello, this is a private message");
+	}
+});
+
+//handle incoming private messages
+bot.onPrivateMessage(event -> {
+	User user = event.getUser();
+	String msg = event.getMessage();
+
+	if(msg.toLowerCase().contains("hello"))
+		user.send("Hello, this is a private message");
+});
+
+//handle channel join updates
+bot.onJoin(event -> {
+	Channel channel = event.getChannel();
+	User user = event.getUser();
+
+	System.out.println("JOIN: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
+});
+
+//handle channel leave updates
+bot.onLeave(event -> {
 	Channel channel = event.getChannel();
 	User user = event.getUser();
 
