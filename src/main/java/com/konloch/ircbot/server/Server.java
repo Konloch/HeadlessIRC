@@ -5,6 +5,7 @@ import com.konloch.ircbot.event.IRCJoin;
 import com.konloch.ircbot.event.IRCLeave;
 import com.konloch.ircbot.event.IRCPrivateMessage;
 import com.konloch.ircbot.event.IRCRoomMessage;
+import com.konloch.util.FastStringUtils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static com.konloch.util.FastStringUtils.split;
+
 /**
  * @author Konloch
  * @since 12/15/2023
@@ -31,6 +34,7 @@ public class Server implements Runnable
 	private static final CharsetEncoder ENCODER = StandardCharsets.UTF_8.newEncoder();
 	private static final CharsetDecoder DECODER = StandardCharsets.UTF_8.newDecoder();
 	private static final Pattern IS_NUMBER = Pattern.compile("\\d+");
+	private static final Pattern LINE_SPLITTER = Pattern.compile("\\r?\\n");
 	
 	private final IRCBot bot;
 	private final String server;
@@ -143,7 +147,7 @@ public class Server implements Runnable
 		//decode into buffer
 		buffer.flip();
 		CharBuffer charBuffer = DECODER.decode(buffer);
-		String[] stringBuffer = charBuffer.toString().split("\\r?\\n");
+		String[] stringBuffer = LINE_SPLITTER.split(charBuffer.toString());
 		
 		//parse each message
 		for(String message : stringBuffer)
@@ -151,6 +155,9 @@ public class Server implements Runnable
 			try
 			{
 				String messageLower = message.toLowerCase();
+				
+				if(messageLower.isEmpty())
+					continue;
 				
 				if(bot.isDebug())
 					System.out.println("IN:  " + message);
@@ -164,7 +171,7 @@ public class Server implements Runnable
 				//decode messages
 				else if (message.startsWith(":"))
 				{
-					String[] splitPartMessage = message.split(" ", 5);
+					String[] splitPartMessage = split(message, " ", 5);
 					
 					if (splitPartMessage.length >= 3)
 					{
@@ -184,13 +191,13 @@ public class Server implements Runnable
 								//case 333: //RPL_TOPICWHOTIME
 								case 353: //RPL_NAMREPLY
 								{
-									String[] channelThenUsers = splitPartMessage[4].split(" ", 2);
+									String[] channelThenUsers = split(splitPartMessage[4], " ", 2);
 									
 									if(channelThenUsers.length <= 0)
 										continue;
 									
 									String channelName = channelThenUsers[0];
-									String[] users = channelThenUsers[1].substring(1).split(" ");
+									String[] users = split(channelThenUsers[1].substring(1), " ");
 									
 									Room room = get(channelName);
 									
@@ -220,14 +227,14 @@ public class Server implements Runnable
 						else
 						{
 							//only a maximum of 4 parameters
-							splitPartMessage = message.split(" ", 4);
+							splitPartMessage = split(message, " ", 4);
 							
 							switch (commandLowerCase)
 							{
 								//decode messages
 								case "privmsg":
 								{
-									String nickname = splitPartMessage[0].substring(1).split("!", 2)[0];
+									String nickname = split(splitPartMessage[0].substring(1), "!", 2)[0];
 									String location = splitPartMessage[2];
 									String msg = splitPartMessage[3].substring(1);
 									
@@ -252,7 +259,7 @@ public class Server implements Runnable
 								//decode join
 								case "join":
 								{
-									String nickname = splitPartMessage[0].substring(1).split("!", 2)[0];
+									String nickname = split(splitPartMessage[0].substring(1), "!", 2)[0];
 									String roomName = splitPartMessage[2];
 									
 									Room room = get(roomName);
@@ -269,7 +276,7 @@ public class Server implements Runnable
 								//decode quit
 								case "quit":
 								{
-									String nickname = splitPartMessage[0].split("!", 2)[0];
+									String nickname = split(splitPartMessage[0].substring(1), "!", 2)[0];
 									
 									for(Room room : rooms)
 									{
