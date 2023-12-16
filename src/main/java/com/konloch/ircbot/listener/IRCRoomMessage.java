@@ -1,5 +1,6 @@
-package com.konloch.ircbot.event;
+package com.konloch.ircbot.listener;
 
+import com.konloch.ircbot.listener.event.RoomMessageEvent;
 import com.konloch.ircbot.server.Room;
 import com.konloch.ircbot.server.User;
 
@@ -9,5 +10,5 @@ import com.konloch.ircbot.server.User;
  */
 public interface IRCRoomMessage
 {
-	void message(Room room, User user, String message);
+	void message(RoomMessageEvent event);
 }

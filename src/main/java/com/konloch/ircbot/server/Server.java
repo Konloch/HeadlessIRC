@@ -1,10 +1,10 @@
 package com.konloch.ircbot.server;
 
 import com.konloch.ircbot.IRCBot;
-import com.konloch.ircbot.event.IRCJoin;
-import com.konloch.ircbot.event.IRCLeave;
-import com.konloch.ircbot.event.IRCPrivateMessage;
-import com.konloch.ircbot.event.IRCRoomMessage;
+import com.konloch.ircbot.listener.IRCJoin;
+import com.konloch.ircbot.listener.IRCLeave;
+import com.konloch.ircbot.listener.IRCPrivateMessage;
+import com.konloch.ircbot.listener.IRCRoomMessage;
 import com.konloch.ircbot.message.integer.IntegerMessage;
 import com.konloch.ircbot.message.text.TextMessage;
 
@@ -261,48 +261,48 @@ public class Server implements Runnable
 	public void onJoin(IRCJoin join)
 	{
 		//filter listener events to only call for this server
-		bot.getListeners().onJoin((room, user) ->
+		bot.getListeners().onJoin(event ->
 		{
-			if(room.getServer() != this)
+			if(event.getServer() != this)
 				return;
 			
-			join.join(room, user);
+			join.join(event);
 		});
 	}
 	
 	public void onLeave(IRCLeave leave)
 	{
 		//filter listener events to only call for this server
-		bot.getListeners().onLeave((room, user) ->
+		bot.getListeners().onLeave(event ->
 		{
-			if(room.getServer() != this)
+			if(event.getServer() != this)
 				return;
 			
-			leave.leave(room, user);
+			leave.leave(event);
 		});
 	}
 	
 	public void onRoomMessage(IRCRoomMessage roomMessage)
 	{
 		//filter listener events to only call for this server
-		bot.getListeners().onRoomMessage((room, user, msg) ->
+		bot.getListeners().onRoomMessage(event ->
 		{
-			if(room.getServer() != this)
+			if(event.getServer() != this)
 				return;
 			
-			roomMessage.message(room, user, msg);
+			roomMessage.message(event);
 		});
 	}
 	
 	public void onPrivateMessage(IRCPrivateMessage privateMessage)
 	{
 		//filter listener events to only call for this server
-		bot.getListeners().onPrivateMessage((user, msg) ->
+		bot.getListeners().onPrivateMessage(event ->
 		{
-			if(user.getServer() != this)
+			if(event.getServer() != this)
 				return;
 			
-			privateMessage.message(user, msg);
+			privateMessage.message(event);
 		});
 	}
 	

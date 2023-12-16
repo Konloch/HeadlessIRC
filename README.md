@@ -40,18 +40,12 @@ Room room2 = server.join("#example-room-2");
 room1.send("Hello room #1");
 room2.send("Hello room #2");
 
-//handle room join updates
-server.onJoin((room, user) -> {
-	System.out.println("JOIN: " + room.getName() + "["+room.getUsers().size()+"] " + user.getNickname());
-});
-
-//handle room leave updates
-server.onLeave((room, user) -> {
-	System.out.println("QUIT: " + room.getName() + "["+room.getUsers().size()+"] " + user.getNickname());
-});
-
 //handle incoming room messages
-server.onRoomMessage((room, user, msg) -> {
+server.onRoomMessage(event -> {
+	Room room = event.getRoom();
+	User user = event.getUser();
+	String msg = event.getMessage();
+
 	if(msg.toLowerCase().contains("hello")) {
 		room.send("Hello, this is a room message");
 		user.send("Hello, this is a private message");
@@ -59,9 +53,28 @@ server.onRoomMessage((room, user, msg) -> {
 });
 
 //handle incoming private messages
-server.onPrivateMessage((user, msg) -> {
+server.onPrivateMessage(event -> {
+	User user = event.getUser();
+	String msg = event.getMessage();
+
 	if(msg.toLowerCase().contains("hello"))
 		user.send("Hello, this is a private message");
+});
+
+//handle room join updates
+server.onJoin(event -> {
+	Room room = event.getRoom();
+	User user = event.getUser();
+
+	System.out.println("JOIN: " + room.getName() + "[" + room.getUsers().size() + "] " + user.getNickname());
+});
+
+//handle room leave updates
+server.onLeave(event -> {
+	Room room = event.getRoom();
+	User user = event.getUser();
+
+	System.out.println("QUIT: " + room.getName() + "[" + room.getUsers().size() + "] " + user.getNickname());
 });
 ```
 

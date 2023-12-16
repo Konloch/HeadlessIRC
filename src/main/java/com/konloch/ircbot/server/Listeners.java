@@ -1,9 +1,12 @@
 package com.konloch.ircbot.server;
 
-import com.konloch.ircbot.event.IRCJoin;
-import com.konloch.ircbot.event.IRCLeave;
-import com.konloch.ircbot.event.IRCPrivateMessage;
-import com.konloch.ircbot.event.IRCRoomMessage;
+import com.konloch.ircbot.listener.IRCJoin;
+import com.konloch.ircbot.listener.IRCLeave;
+import com.konloch.ircbot.listener.IRCPrivateMessage;
+import com.konloch.ircbot.listener.IRCRoomMessage;
+import com.konloch.ircbot.listener.event.GenericRoomEvent;
+import com.konloch.ircbot.listener.event.PrivateMessageEvent;
+import com.konloch.ircbot.listener.event.RoomMessageEvent;
 
 import java.util.ArrayList;
 
@@ -13,33 +16,33 @@ import java.util.ArrayList;
  */
 public class Listeners
 {
-	private ArrayList<IRCJoin> onJoin = new ArrayList<>();
-	private ArrayList<IRCLeave> onLeave = new ArrayList<>();
-	private ArrayList<IRCRoomMessage> roomMessages = new ArrayList<>();
-	private ArrayList<IRCPrivateMessage> privateMessages = new ArrayList<>();
+	private final ArrayList<IRCJoin> onJoin = new ArrayList<>();
+	private final ArrayList<IRCLeave> onLeave = new ArrayList<>();
+	private final ArrayList<IRCRoomMessage> roomMessages = new ArrayList<>();
+	private final ArrayList<IRCPrivateMessage> privateMessages = new ArrayList<>();
 	
 	public void callOnJoin(Room room, User user)
 	{
 		for(IRCJoin event : onJoin)
-			event.join(room, user);
+			event.join(new GenericRoomEvent(room.getServer(), room, user));
 	}
 	
 	public void callOnLeave(Room room, User user)
 	{
 		for(IRCLeave event : onLeave)
-			event.leave(room, user);
+			event.leave(new GenericRoomEvent(room.getServer(), room, user));
 	}
 	
 	public void callRoomMessage(Room room, User user, String message)
 	{
 		for(IRCRoomMessage event : roomMessages)
-			event.message(room, user, message);
+			event.message(new RoomMessageEvent(room.getServer(), room, user, message));
 	}
 	
 	public void callPrivateMessage(User user, String message)
 	{
 		for(IRCPrivateMessage event : privateMessages)
-			event.message(user, message);
+			event.message(new PrivateMessageEvent(user.getServer(), user, message));
 	}
 	
 	public void onJoin(IRCJoin join)

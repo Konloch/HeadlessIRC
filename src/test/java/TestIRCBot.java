@@ -1,5 +1,7 @@
 import com.konloch.ircbot.IRCBot;
+import com.konloch.ircbot.server.Room;
 import com.konloch.ircbot.server.Server;
+import com.konloch.ircbot.server.User;
 
 /**
  * @author Konloch
@@ -14,23 +16,36 @@ public class TestIRCBot
 		
 		server.join("#test-channel-1");
 		
-		server.onJoin((room, user) ->
+		server.onJoin(event ->
 		{
-			System.out.println("JOIN: " + room.getName() + "["+room.getUsers().size()+"] " + user.getNickname());
+			Room room = event.getRoom();
+			User user = event.getUser();
+			
+			System.out.println("JOIN: " + room.getName() + "[" + room.getUsers().size() + "] " + user.getNickname());
 		});
 		
-		server.onLeave((room, user) ->
+		server.onLeave(event ->
 		{
+			Room room = event.getRoom();
+			User user = event.getUser();
+			
 			System.out.println("QUIT: " + room.getName() + "["+room.getUsers().size()+"] " + user.getNickname());
 		});
 		
-		server.onRoomMessage((room, user, msg) ->
+		server.onRoomMessage(event ->
 		{
+			Room room = event.getRoom();
+			User user = event.getUser();
+			String msg = event.getMessage();
+			
 			System.out.println("MSG:  " + room.getName() + "["+room.getUsers().size()+"] " + user.getNickname() + ": " + msg);
 		});
 		
-		server.onPrivateMessage((user, msg) ->
+		server.onPrivateMessage(event ->
 		{
+			User user = event.getUser();
+			String msg = event.getMessage();
+			
 			System.out.println("PM:   " + user.getNickname() + ": " + msg);
 		});
 	}
