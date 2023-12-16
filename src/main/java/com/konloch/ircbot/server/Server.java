@@ -7,7 +7,6 @@ import com.konloch.ircbot.event.IRCPrivateMessage;
 import com.konloch.ircbot.event.IRCRoomMessage;
 import com.konloch.ircbot.message.integer.IntegerMessage;
 import com.konloch.ircbot.message.text.TextMessage;
-import com.konloch.util.FastStringUtils;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -261,8 +260,8 @@ public class Server implements Runnable
 	
 	public void onJoin(IRCJoin join)
 	{
-		//filter the global event to only call for this server
-		bot.getGlobalEvents().onJoin((room, user) ->
+		//filter listener events to only call for this server
+		bot.getListeners().onJoin((room, user) ->
 		{
 			if(room.getServer() != this)
 				return;
@@ -273,8 +272,8 @@ public class Server implements Runnable
 	
 	public void onLeave(IRCLeave leave)
 	{
-		//filter the global event to only call for this server
-		bot.getGlobalEvents().onLeave((room, user) ->
+		//filter listener events to only call for this server
+		bot.getListeners().onLeave((room, user) ->
 		{
 			if(room.getServer() != this)
 				return;
@@ -285,8 +284,8 @@ public class Server implements Runnable
 	
 	public void onRoomMessage(IRCRoomMessage roomMessage)
 	{
-		//filter the global event to only call for this server
-		bot.getGlobalEvents().onRoomMessage((room, user, msg) ->
+		//filter listener events to only call for this server
+		bot.getListeners().onRoomMessage((room, user, msg) ->
 		{
 			if(room.getServer() != this)
 				return;
@@ -297,8 +296,8 @@ public class Server implements Runnable
 	
 	public void onPrivateMessage(IRCPrivateMessage privateMessage)
 	{
-		//filter the global event to only call for this server
-		bot.getGlobalEvents().onPrivateMessage((user, msg) ->
+		//filter listener events to only call for this server
+		bot.getListeners().onPrivateMessage((user, msg) ->
 		{
 			if(user.getServer() != this)
 				return;

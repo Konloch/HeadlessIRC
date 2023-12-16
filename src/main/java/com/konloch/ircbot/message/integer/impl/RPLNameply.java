@@ -37,8 +37,8 @@ public class RPLNameply implements IntegerMessageEvent
 				//add user to room
 				User user = room.add(nickname);
 				
-				//call on global event system
-				server.getBot().getGlobalEvents().callOnJoin(room, user);
+				//call on listener event
+				server.getBot().getListeners().callOnJoin(room, user);
 			}
 		}
 	}

@@ -30,8 +30,8 @@ public class PrivMSG implements TextMessageEvent
 				
 				User user = room.get(nickname);
 				
-				//call on global event system
-				server.getBot().getGlobalEvents().callRoomMessage(room, user, msg);
+				//call on listener event
+				server.getBot().getListeners().callRoomMessage(room, user, msg);
 			}
 		}
 		else

@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * @author Konloch
  * @since 12/15/2023
  */
-public class Events
+public class Listeners
 {
 	private ArrayList<IRCJoin> onJoin = new ArrayList<>();
 	private ArrayList<IRCLeave> onLeave = new ArrayList<>();

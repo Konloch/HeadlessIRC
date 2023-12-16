@@ -1,6 +1,6 @@
 package com.konloch.ircbot;
 
-import com.konloch.ircbot.server.Events;
+import com.konloch.ircbot.server.Listeners;
 import com.konloch.ircbot.server.Server;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class IRCBot
 	private String client;
 	private boolean debug = false;
 	private final List<Server> servers = new ArrayList<>();
-	private final Events globalEvents = new Events();
+	private final Listeners listeners = new Listeners();
 	
 	public IRCBot(String nickname, String client)
 	{
@@ -84,8 +84,8 @@ public class IRCBot
 		return client;
 	}
 	
-	public Events getGlobalEvents()
+	public Listeners getListeners()
 	{
-		return globalEvents;
+		return listeners;
 	}
 }

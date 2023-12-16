@@ -25,8 +25,8 @@ public class Quit implements TextMessageEvent
 			
 			if(user != null)
 			{
-				//call on global event system
-				server.getBot().getGlobalEvents().callOnLeave(room, user);
+				//call on listener event
+				server.getBot().getListeners().callOnLeave(room, user);
 				break;
 			}
 		}
