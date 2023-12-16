@@ -3,10 +3,10 @@ package com.konloch.ircbot.server;
 import com.konloch.ircbot.listener.IRCJoin;
 import com.konloch.ircbot.listener.IRCLeave;
 import com.konloch.ircbot.listener.IRCPrivateMessage;
-import com.konloch.ircbot.listener.IRCRoomMessage;
-import com.konloch.ircbot.listener.event.GenericRoomEvent;
+import com.konloch.ircbot.listener.IRCChannelMessage;
+import com.konloch.ircbot.listener.event.GenericChannelEvent;
 import com.konloch.ircbot.listener.event.PrivateMessageEvent;
-import com.konloch.ircbot.listener.event.RoomMessageEvent;
+import com.konloch.ircbot.listener.event.ChannelMessageEvent;
 
 import java.util.ArrayList;
 
@@ -18,25 +18,25 @@ public class Listeners
 {
 	private final ArrayList<IRCJoin> onJoin = new ArrayList<>();
 	private final ArrayList<IRCLeave> onLeave = new ArrayList<>();
-	private final ArrayList<IRCRoomMessage> roomMessages = new ArrayList<>();
+	private final ArrayList<IRCChannelMessage> channelMessages = new ArrayList<>();
 	private final ArrayList<IRCPrivateMessage> privateMessages = new ArrayList<>();
 	
-	public void callOnJoin(Room room, User user)
+	public void callOnJoin(Channel channel, User user)
 	{
 		for(IRCJoin event : onJoin)
-			event.join(new GenericRoomEvent(room.getServer(), room, user));
+			event.join(new GenericChannelEvent(channel.getServer(), channel, user));
 	}
 	
-	public void callOnLeave(Room room, User user)
+	public void callOnLeave(Channel channel, User user)
 	{
 		for(IRCLeave event : onLeave)
-			event.leave(new GenericRoomEvent(room.getServer(), room, user));
+			event.leave(new GenericChannelEvent(channel.getServer(), channel, user));
 	}
 	
-	public void callRoomMessage(Room room, User user, String message)
+	public void callChannelMessage(Channel channel, User user, String message)
 	{
-		for(IRCRoomMessage event : roomMessages)
-			event.message(new RoomMessageEvent(room.getServer(), room, user, message));
+		for(IRCChannelMessage event : channelMessages)
+			event.message(new ChannelMessageEvent(channel.getServer(), channel, user, message));
 	}
 	
 	public void callPrivateMessage(User user, String message)
@@ -55,9 +55,9 @@ public class Listeners
 		onLeave.add(leave);
 	}
 	
-	public void onRoomMessage(IRCRoomMessage leave)
+	public void onChannelMessage(IRCChannelMessage leave)
 	{
-		roomMessages.add(leave);
+		channelMessages.add(leave);
 	}
 	
 	public void onPrivateMessage(IRCPrivateMessage leave)
@@ -75,9 +75,9 @@ public class Listeners
 		return onLeave;
 	}
 	
-	public ArrayList<IRCRoomMessage> getRoomMessages()
+	public ArrayList<IRCChannelMessage> getChannelMessages()
 	{
-		return roomMessages;
+		return channelMessages;
 	}
 	
 	public ArrayList<IRCPrivateMessage> getPrivateMessages()

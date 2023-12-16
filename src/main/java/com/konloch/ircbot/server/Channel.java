@@ -2,8 +2,7 @@ package com.konloch.ircbot.server;
 
 import com.konloch.ircbot.listener.IRCJoin;
 import com.konloch.ircbot.listener.IRCLeave;
-import com.konloch.ircbot.listener.IRCPrivateMessage;
-import com.konloch.ircbot.listener.IRCRoomMessage;
+import com.konloch.ircbot.listener.IRCChannelMessage;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Konloch
  * @since 12/15/2023
  */
-public class Room
+public class Channel
 {
 	private final Server server;
 	private final String name;
@@ -24,7 +23,7 @@ public class Room
 	private final Queue<String> messageQueue = new LinkedList<>();
 	private final List<User> users = new CopyOnWriteArrayList<>();
 	
-	public Room(Server server, String name)
+	public Channel(Server server, String name)
 	{
 		this.server = server;
 		this.name = name;
@@ -34,7 +33,7 @@ public class Room
 	{
 		try
 		{
-			//rejoin room after 5 seconds from initial attempt
+			//rejoin channel after 5 seconds from initial attempt
 			if (!isJoined() && System.currentTimeMillis() - getLastJoinAttempt() >= 5000)
 			{
 				setLastJoinAttempt(System.currentTimeMillis());
@@ -62,7 +61,7 @@ public class Room
 					}
 				}
 				
-				//send room messages
+				//send channel messages
 				for (int i = 0; i < 5; i++)
 				{
 					if (getMessageQueue().isEmpty())
@@ -140,7 +139,7 @@ public class Room
 		//filter listener events to only call for this server
 		server.getBot().getListeners().onJoin(event ->
 		{
-			if(event.getRoom() != this)
+			if(event.getChannel() != this)
 				return;
 			
 			join.join(event);
@@ -152,22 +151,22 @@ public class Room
 		//filter listener events to only call for this server
 		server.getBot().getListeners().onLeave(event ->
 		{
-			if(event.getRoom() != this)
+			if(event.getChannel() != this)
 				return;
 			
 			leave.leave(event);
 		});
 	}
 	
-	public void onMessage(IRCRoomMessage roomMessage)
+	public void onMessage(IRCChannelMessage message)
 	{
 		//filter listener events to only call for this server
-		server.getBot().getListeners().onRoomMessage(event ->
+		server.getBot().getListeners().onChannelMessage(event ->
 		{
-			if(event.getRoom() != this)
+			if(event.getChannel() != this)
 				return;
 			
-			roomMessage.message(event);
+			message.message(event);
 		});
 	}
 	

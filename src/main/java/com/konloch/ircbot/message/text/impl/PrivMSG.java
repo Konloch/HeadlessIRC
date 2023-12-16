@@ -1,7 +1,7 @@
 package com.konloch.ircbot.message.text.impl;
 
 import com.konloch.ircbot.message.text.TextMessageEvent;
-import com.konloch.ircbot.server.Room;
+import com.konloch.ircbot.server.Channel;
 import com.konloch.ircbot.server.Server;
 import com.konloch.ircbot.server.User;
 
@@ -22,16 +22,16 @@ public class PrivMSG implements TextMessageEvent
 		
 		if(location.startsWith("#"))
 		{
-			Room room = server.get(location);
+			Channel channel = server.get(location);
 			
-			if (room != null)
+			if (channel != null)
 			{
-				room.setJoined(true);
+				channel.setJoined(true);
 				
-				User user = room.get(nickname);
+				User user = channel.get(nickname);
 				
 				//call on listener event
-				server.getBot().getListeners().callRoomMessage(room, user, msg);
+				server.getBot().getListeners().callChannelMessage(channel, user, msg);
 			}
 		}
 		else

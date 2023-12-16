@@ -1,7 +1,7 @@
 package com.konloch.ircbot.message.text.impl;
 
 import com.konloch.ircbot.message.text.TextMessageEvent;
-import com.konloch.ircbot.server.Room;
+import com.konloch.ircbot.server.Channel;
 import com.konloch.ircbot.server.Server;
 import com.konloch.ircbot.server.User;
 
@@ -17,19 +17,19 @@ public class Join implements TextMessageEvent
 	public void handle(Server server, String[] splitPartMessage)
 	{
 		String nickname = split(splitPartMessage[0].substring(1), "!", 2)[0];
-		String roomName = splitPartMessage[2];
+		String channelName = splitPartMessage[2];
 		
-		Room room = server.get(roomName);
+		Channel channel = server.get(channelName);
 		
-		if (room != null)
+		if (channel != null)
 		{
-			room.setJoined(true);
+			channel.setJoined(true);
 			
-			//add user to room
-			User user = room.add(nickname);
+			//add user to channel
+			User user = channel.add(nickname);
 			
 			//call on listener event
-			server.getBot().getListeners().callOnJoin(room, user);
+			server.getBot().getListeners().callOnJoin(channel, user);
 		}
 	}
 }

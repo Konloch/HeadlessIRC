@@ -1,8 +1,6 @@
 package com.konloch.ircbot.listener;
 
-import com.konloch.ircbot.listener.event.GenericRoomEvent;
-import com.konloch.ircbot.server.Room;
-import com.konloch.ircbot.server.User;
+import com.konloch.ircbot.listener.event.GenericChannelEvent;
 
 /**
  * @author Konloch
@@ -10,5 +8,5 @@ import com.konloch.ircbot.server.User;
  */
 public interface IRCJoin
 {
-	void join(GenericRoomEvent event);
+	void join(GenericChannelEvent event);
 }

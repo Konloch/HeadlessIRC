@@ -1,7 +1,7 @@
 package com.konloch.ircbot.message.integer.impl;
 
 import com.konloch.ircbot.message.integer.IntegerMessageEvent;
-import com.konloch.ircbot.server.Room;
+import com.konloch.ircbot.server.Channel;
 import com.konloch.ircbot.server.Server;
 import com.konloch.ircbot.server.User;
 
@@ -25,20 +25,20 @@ public class RPLNameply implements IntegerMessageEvent
 		String channelName = channelThenUsers[0];
 		String[] users = split(channelThenUsers[1].substring(1), " ");
 		
-		Room room = server.get(channelName);
+		Channel channel = server.get(channelName);
 		
-		if(room != null)
+		if(channel != null)
 		{
-			room.setJoined(true);
+			channel.setJoined(true);
 			
 			//process each nick
 			for(String nickname : users)
 			{
-				//add user to room
-				User user = room.add(nickname);
+				//add user to channel
+				User user = channel.add(nickname);
 				
 				//call on listener event
-				server.getBot().getListeners().callOnJoin(room, user);
+				server.getBot().getListeners().callOnJoin(channel, user);
 			}
 		}
 	}

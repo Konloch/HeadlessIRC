@@ -1,7 +1,7 @@
 package com.konloch.ircbot.message.text.impl;
 
 import com.konloch.ircbot.message.text.TextMessageEvent;
-import com.konloch.ircbot.server.Room;
+import com.konloch.ircbot.server.Channel;
 import com.konloch.ircbot.server.Server;
 import com.konloch.ircbot.server.User;
 
@@ -18,15 +18,15 @@ public class Quit implements TextMessageEvent
 	{
 		String nickname = split(splitPartMessage[0].substring(1), "!", 2)[0];
 		
-		for(Room room : server.getRooms())
+		for(Channel channel : server.getChannels())
 		{
-			//remove user from room
-			User user = room.remove(nickname);
+			//remove user from channel
+			User user = channel.remove(nickname);
 			
 			if(user != null)
 			{
 				//call on listener event
-				server.getBot().getListeners().callOnLeave(room, user);
+				server.getBot().getListeners().callOnLeave(channel, user);
 				break;
 			}
 		}

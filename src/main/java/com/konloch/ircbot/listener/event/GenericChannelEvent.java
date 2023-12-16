@@ -1,6 +1,6 @@
 package com.konloch.ircbot.listener.event;
 
-import com.konloch.ircbot.server.Room;
+import com.konloch.ircbot.server.Channel;
 import com.konloch.ircbot.server.Server;
 import com.konloch.ircbot.server.User;
 
@@ -8,21 +8,21 @@ import com.konloch.ircbot.server.User;
  * @author Konloch
  * @since 12/15/2023
  */
-public class GenericRoomEvent extends GenericServerEvent
+public class GenericChannelEvent extends GenericServerEvent
 {
-	private final Room room;
+	private final Channel channel;
 	private final User user;
 	
-	public GenericRoomEvent(Server server, Room room, User user)
+	public GenericChannelEvent(Server server, Channel channel, User user)
 	{
 		super(server);
-		this.room = room;
+		this.channel = channel;
 		this.user = user;
 	}
 	
-	public Room getRoom()
+	public Channel getChannel()
 	{
-		return room;
+		return channel;
 	}
 	
 	public User getUser()

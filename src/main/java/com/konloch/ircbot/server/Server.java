@@ -4,7 +4,7 @@ import com.konloch.ircbot.IRCBot;
 import com.konloch.ircbot.listener.IRCJoin;
 import com.konloch.ircbot.listener.IRCLeave;
 import com.konloch.ircbot.listener.IRCPrivateMessage;
-import com.konloch.ircbot.listener.IRCRoomMessage;
+import com.konloch.ircbot.listener.IRCChannelMessage;
 import com.konloch.ircbot.message.integer.IntegerMessage;
 import com.konloch.ircbot.message.text.TextMessage;
 
@@ -45,7 +45,7 @@ public class Server implements Runnable
 	private Selector selector;
 	private SocketChannel socketChannel;
 	
-	private final List<Room> rooms = new ArrayList<>();
+	private final List<Channel> channels = new ArrayList<>();
 	
 	public Server(IRCBot bot, String server, int port)
 	{
@@ -54,11 +54,11 @@ public class Server implements Runnable
 		this.port = port;
 	}
 	
-	public Room join(String channel)
+	public Channel join(String channelName)
 	{
-		Room room = new Room(this, channel);
-		rooms.add(room);
-		return room;
+		Channel channel = new Channel(this, channelName);
+		channels.add(channel);
+		return channel;
 	}
 	
 	public void process()
@@ -67,13 +67,13 @@ public class Server implements Runnable
 		if(socketChannel == null || socketChannel.isConnectionPending() || !socketChannel.isConnected())
 			return;
 		
-		//remove any non-active rooms
-		rooms.removeIf(room -> !room.isActive());
+		//remove any non-active channels
+		channels.removeIf(channel -> !channel.isActive());
 		
-		//process all rooms
-		for(Room room : rooms)
+		//process all channels
+		for(Channel channel : channels)
 		{
-			room.process();
+			channel.process();
 		}
 	}
 	
@@ -245,14 +245,14 @@ public class Server implements Runnable
 		}
 	}
 	
-	public Room get(String room)
+	public Channel get(String channelName)
 	{
-		if(room.startsWith(":"))
-			room = room.substring(1);
+		if(channelName.startsWith(":"))
+			channelName = channelName.substring(1);
 		
-		for(Room r : rooms)
-			if(r.getName().equalsIgnoreCase(room) ||
-					r.getName().equalsIgnoreCase("#" + room))
+		for(Channel r : channels)
+			if(r.getName().equalsIgnoreCase(channelName) ||
+					r.getName().equalsIgnoreCase("#" + channelName))
 				return r;
 		
 		return null;
@@ -282,19 +282,19 @@ public class Server implements Runnable
 		});
 	}
 	
-	public void onRoomMessage(IRCRoomMessage roomMessage)
+	public void onChannelMessage(IRCChannelMessage message)
 	{
 		//filter listener events to only call for this server
-		bot.getListeners().onRoomMessage(event ->
+		bot.getListeners().onChannelMessage(event ->
 		{
 			if(event.getServer() != this)
 				return;
 			
-			roomMessage.message(event);
+			message.message(event);
 		});
 	}
 	
-	public void onPrivateMessage(IRCPrivateMessage privateMessage)
+	public void onPrivateMessage(IRCPrivateMessage message)
 	{
 		//filter listener events to only call for this server
 		bot.getListeners().onPrivateMessage(event ->
@@ -302,13 +302,13 @@ public class Server implements Runnable
 			if(event.getServer() != this)
 				return;
 			
-			privateMessage.message(event);
+			message.message(event);
 		});
 	}
 	
-	public List<Room> getRooms()
+	public List<Channel> getChannels()
 	{
-		return rooms;
+		return channels;
 	}
 	
 	public IRCBot getBot()

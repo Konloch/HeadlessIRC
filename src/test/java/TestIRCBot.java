@@ -1,5 +1,5 @@
 import com.konloch.ircbot.IRCBot;
-import com.konloch.ircbot.server.Room;
+import com.konloch.ircbot.server.Channel;
 import com.konloch.ircbot.server.Server;
 import com.konloch.ircbot.server.User;
 
@@ -14,31 +14,31 @@ public class TestIRCBot
 		IRCBot bot = new IRCBot("Test Nick", "Test Client");
 		Server server = bot.join("irc.freenode.net");
 		
-		server.join("#test-channel-1");
+		Channel joinedChannel = server.join("#test-channel-1");
 		
 		server.onJoin(event ->
 		{
-			Room room = event.getRoom();
+			Channel channel = event.getChannel();
 			User user = event.getUser();
 			
-			System.out.println("JOIN: " + room.getName() + "[" + room.getUsers().size() + "] " + user.getNickname());
+			System.out.println("JOIN: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
 		});
 		
 		server.onLeave(event ->
 		{
-			Room room = event.getRoom();
+			Channel channel = event.getChannel();
 			User user = event.getUser();
 			
-			System.out.println("QUIT: " + room.getName() + "["+room.getUsers().size()+"] " + user.getNickname());
+			System.out.println("QUIT: " + channel.getName() + "["+ channel.getUsers().size()+"] " + user.getNickname());
 		});
 		
-		server.onRoomMessage(event ->
+		server.onChannelMessage(event ->
 		{
-			Room room = event.getRoom();
+			Channel channel = event.getChannel();
 			User user = event.getUser();
 			String msg = event.getMessage();
 			
-			System.out.println("MSG:  " + room.getName() + "["+room.getUsers().size()+"] " + user.getNickname() + ": " + msg);
+			System.out.println("MSG:  " + channel.getName() + "["+ channel.getUsers().size()+"] " + user.getNickname() + ": " + msg);
 		});
 		
 		server.onPrivateMessage(event ->
