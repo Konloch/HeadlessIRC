@@ -1,6 +1,9 @@
 # Java IRC Bot
 Zero dependency pure Java library for implementing your own NIO IRC Clients / Bots / Crawlers / Loggers.
 
+## 💡 Requirements
++ Java Runtime 1.8 **or higher**
+
 <!--
 ## How To Add As Library
 Add it as a maven dependency or just [download the latest release](https://github.com/Konloch/JavaIRCBot/releases).
@@ -13,12 +16,12 @@ Add it as a maven dependency or just [download the latest release](https://githu
 ```
 
 --->
-## Links
+## 📚 Links
 * [Website](https://konloch.com/JavaIRCBot/)
 * [Discord Server](https://discord.gg/aexsYpfMEf)
 * [Download Releases](https://konloch.com/JavaIRCBot/releases)
 
-## How To Use
+## 💻 How To Use
 
 1) Create a new bot instance, from there join the server you want and store that object.
 ```java
@@ -62,6 +65,6 @@ server.onPrivateMessage((user, msg) -> {
 });
 ```
 
-## Disclaimer
+## 👨‍💻 Disclaimer
 + Still a work in progress / in development
 + Lacks most IRC features beyond the absolute basics
