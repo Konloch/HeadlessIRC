@@ -5,6 +5,7 @@ import com.konloch.ircbot.event.IRCJoin;
 import com.konloch.ircbot.event.IRCLeave;
 import com.konloch.ircbot.event.IRCPrivateMessage;
 import com.konloch.ircbot.event.IRCRoomMessage;
+import com.konloch.ircbot.message.integer.IntegerMessage;
 import com.konloch.util.FastStringUtils;
 
 import java.io.IOException;
@@ -186,41 +187,12 @@ public class Server implements Runnable
 							if(bot.isDebug())
 								System.out.println("OP:  " + opcode);
 							
-							switch(opcode)
-							{
-								//case 333: //RPL_TOPICWHOTIME
-								case 353: //RPL_NAMREPLY
-								{
-									String[] channelThenUsers = split(splitPartMessage[4], " ", 2);
-									
-									if(channelThenUsers.length <= 0)
-										continue;
-									
-									String channelName = channelThenUsers[0];
-									String[] users = split(channelThenUsers[1].substring(1), " ");
-									
-									Room room = get(channelName);
-									
-									if(room != null)
-									{
-										room.setJoined(true);
-										
-										switch(opcode)
-										{
-											case 333: //RPL_TOPICWHOTIME
-												break;
-											case 353: //RPL_NAMREPLY
-												for(String nickname : users)
-												{
-													User user = room.add(nickname);
-													bot.getGlobalEvents().callOnJoin(room, user);
-												}
-												break;
-										}
-									}
-								}
-								break;
-							}
+							//look up the integer message
+							IntegerMessage intMsg = IntegerMessage.opcode(opcode);
+							
+							//process the message
+							if(intMsg != null)
+								intMsg.getEvent().handle(this, splitPartMessage);
 						}
 						
 						//handle text based commands
