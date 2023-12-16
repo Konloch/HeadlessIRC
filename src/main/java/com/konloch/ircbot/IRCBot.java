@@ -1,5 +1,9 @@
 package com.konloch.ircbot;
 
+import com.konloch.ircbot.listener.IRCChannelMessage;
+import com.konloch.ircbot.listener.IRCJoin;
+import com.konloch.ircbot.listener.IRCLeave;
+import com.konloch.ircbot.listener.IRCPrivateMessage;
 import com.konloch.ircbot.server.Listeners;
 import com.konloch.ircbot.server.Server;
 
@@ -62,6 +66,26 @@ public class IRCBot
 		
 		//return the server instance
 		return server;
+	}
+	
+	public void onJoin(IRCJoin join)
+	{
+		getListeners().onJoin(join);
+	}
+	
+	public void onLeave(IRCLeave leave)
+	{
+		getListeners().onLeave(leave);
+	}
+	
+	public void onChannelMessage(IRCChannelMessage message)
+	{
+		getListeners().onChannelMessage(message);
+	}
+	
+	public void onPrivateMessage(IRCPrivateMessage message)
+	{
+		getListeners().onPrivateMessage(message);
 	}
 	
 	public boolean isDebug()
