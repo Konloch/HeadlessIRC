@@ -25,7 +25,7 @@ Add it as a maven dependency or just [download the latest release](https://githu
 
 1) Create a new bot instance, from there join the server you want and store that object.
 ```java
-IRCBot bot = new IRCBot("your nick goes here", "Java IRC Client");
+IRCBot bot = new IRCBot("YourNickGoesHere", "Java IRC Client");
 Server server = bot.join("irc.freenode.net");
 ```
 
