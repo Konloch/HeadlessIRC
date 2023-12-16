@@ -35,10 +35,7 @@ public class RPLNameply implements IntegerMessageEvent
 			for(String nickname : users)
 			{
 				//add user to channel
-				User user = channel.add(nickname);
-				
-				//call on listener event
-				server.getBot().getListeners().callOnJoin(channel, user);
+				channel.add(nickname);
 			}
 		}
 	}
