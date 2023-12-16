@@ -239,10 +239,6 @@ public class Server implements Runnable
 										{
 											room.setJoined(true);
 											User user = room.get(nickname);
-											
-											if(user == null)
-												System.out.println("NULL ON: " + nickname);
-											
 											bot.getGlobalEvents().callRoomMessage(room, user, msg);
 										}
 									}
