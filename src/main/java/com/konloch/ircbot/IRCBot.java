@@ -1,5 +1,6 @@
 package com.konloch.ircbot;
 
+import com.konloch.ircbot.server.Events;
 import com.konloch.ircbot.server.Server;
 
 import java.util.ArrayList;
@@ -14,12 +15,31 @@ public class IRCBot
 	private boolean active = true;
 	private String nickname;
 	private String client;
+	private boolean debug = false;
 	private final List<Server> servers = new ArrayList<>();
+	private final Events globalEvents = new Events();
 	
 	public IRCBot(String nickname, String client)
 	{
 		this.nickname = nickname;
 		this.client = client;
+		
+		new Thread(()->
+		{
+			while(active)
+			{
+				try
+				{
+					Thread.sleep(1);
+					
+					servers.forEach(Server::process);
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}).start();
 	}
 	
 	public Server join(String serverAddress)
@@ -37,8 +57,16 @@ public class IRCBot
 		Server server = new Server(this, serverAddress, port);
 		servers.add(server);
 		
+		//start the server thread
+		new Thread(server).start();
+		
 		//return the server instance
 		return server;
+	}
+	
+	public boolean isDebug()
+	{
+		return debug;
 	}
 	
 	public boolean isActive()
@@ -54,5 +82,10 @@ public class IRCBot
 	public String getClient()
 	{
 		return client;
+	}
+	
+	public Events getGlobalEvents()
+	{
+		return globalEvents;
 	}
 }
