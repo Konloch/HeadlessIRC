@@ -6,6 +6,7 @@ import com.konloch.ircbot.event.IRCLeave;
 import com.konloch.ircbot.event.IRCPrivateMessage;
 import com.konloch.ircbot.event.IRCRoomMessage;
 import com.konloch.ircbot.message.integer.IntegerMessage;
+import com.konloch.ircbot.message.text.TextMessage;
 import com.konloch.util.FastStringUtils;
 
 import java.io.IOException;
@@ -201,67 +202,12 @@ public class Server implements Runnable
 							//only a maximum of 4 parameters
 							splitPartMessage = split(message, " ", 4);
 							
-							switch (commandLowerCase)
-							{
-								//decode messages
-								case "privmsg":
-								{
-									String nickname = split(splitPartMessage[0].substring(1), "!", 2)[0];
-									String location = splitPartMessage[2];
-									String msg = splitPartMessage[3].substring(1);
-									
-									if(location.startsWith("#"))
-									{
-										Room room = get(location);
-										
-										if (room != null)
-										{
-											room.setJoined(true);
-											User user = room.get(nickname);
-											bot.getGlobalEvents().callRoomMessage(room, user, msg);
-										}
-									}
-									else
-									{
-										//TODO handle pm
-									}
-								}
-								break;
-								
-								//decode join
-								case "join":
-								{
-									String nickname = split(splitPartMessage[0].substring(1), "!", 2)[0];
-									String roomName = splitPartMessage[2];
-									
-									Room room = get(roomName);
-									
-									if (room != null)
-									{
-										room.setJoined(true);
-										User user = room.add(nickname);
-										bot.getGlobalEvents().callOnJoin(room, user);
-									}
-								}
-								break;
-								
-								//decode quit
-								case "quit":
-								{
-									String nickname = split(splitPartMessage[0].substring(1), "!", 2)[0];
-									
-									for(Room room : rooms)
-									{
-										User user = room.remove(nickname);
-										if(user != null)
-										{
-											bot.getGlobalEvents().callOnLeave(room, user);
-											break;
-										}
-									}
-								}
-								break;
-							}
+							//look up the integer message
+							TextMessage textMsg = TextMessage.opcode(commandLowerCase);
+							
+							//process the message
+							if(textMsg != null)
+								textMsg.getEvent().handle(this, splitPartMessage);
 						}
 					}
 				}
@@ -279,6 +225,7 @@ public class Server implements Runnable
 	{
 		if(bot.isDebug())
 			System.out.println("OUT: " + message);
+		
 		String formattedMessage = message + "\r\n";
 		ByteBuffer buffer = ENCODER.encode(CharBuffer.wrap(formattedMessage));
 		socketChannel.write(buffer);
