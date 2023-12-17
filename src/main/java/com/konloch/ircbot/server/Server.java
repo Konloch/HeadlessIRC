@@ -93,27 +93,20 @@ public class Server implements Runnable
 				
 				while (active)
 				{
-					try
+					selector.select();
+					
+					Set<SelectionKey> keys = selector.selectedKeys();
+					Iterator<SelectionKey> keyIterator = keys.iterator();
+					
+					while (keyIterator.hasNext())
 					{
-						selector.select();
+						SelectionKey key = keyIterator.next();
+						keyIterator.remove();
 						
-						Set<SelectionKey> keys = selector.selectedKeys();
-						Iterator<SelectionKey> keyIterator = keys.iterator();
-						
-						while (keyIterator.hasNext())
-						{
-							SelectionKey key = keyIterator.next();
-							keyIterator.remove();
-							
-							if (key.isConnectable())
-								connect();
-							else if (key.isReadable())
-								read();
-						}
-					}
-					catch (Exception e)
-					{
-						e.printStackTrace();
+						if (key.isConnectable())
+							connect();
+						else if (key.isReadable())
+							read();
 					}
 				}
 			}
