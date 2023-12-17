@@ -112,7 +112,7 @@
 				<configuration>
 					<transformers>
 						<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-							<mainClass>com.konloch.iterate.IterateINI</mainClass>
+							<mainClass>com.konloch.ircbot.IRCBot</mainClass>
 							<manifestEntries>
 								<Implementation-Version>${project.version}</Implementation-Version>
 								<X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
