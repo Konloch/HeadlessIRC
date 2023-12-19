@@ -16,12 +16,25 @@ public class TestIRCBot
 		
 		Channel joinedChannel = server.join("#test-channel-1");
 		
+		server.onConnectionEstablished(event ->
+		{
+			System.out.println("CONNECTED: " + event.getServer());
+		});
+		
+		server.onConnectionLost(event ->
+		{
+			System.out.println("DISCONNECTED: " + event.getServer());
+		});
+		
 		server.onJoin(event ->
 		{
 			Channel channel = event.getChannel();
 			User user = event.getUser();
 			
-			System.out.println("JOIN: " + channel.getName() + "[" + channel.getUsers().size() + "] " + user.getNickname());
+			if(!user.isSelfBot())
+				System.out.println("JOIN: " + channel + "[" + channel.getUsers().size() + "] " + user.getNickname());
+			else
+				System.out.println("JOINED CHANNEL: " + channel);
 		});
 		
 		server.onLeave(event ->
@@ -29,7 +42,7 @@ public class TestIRCBot
 			Channel channel = event.getChannel();
 			User user = event.getUser();
 			
-			System.out.println("QUIT: " + channel.getName() + "["+ channel.getUsers().size()+"] " + user.getNickname());
+			System.out.println("QUIT: " + channel + "["+ channel.getUsers().size()+"] " + user.getNickname());
 		});
 		
 		server.onChannelMessage(event ->
@@ -38,7 +51,7 @@ public class TestIRCBot
 			User user = event.getUser();
 			String msg = event.getMessage();
 			
-			System.out.println("MSG:  " + channel.getName() + "["+ channel.getUsers().size()+"] " + user.getNickname() + ": " + msg);
+			System.out.println("MSG:  " + channel + "["+ channel.getUsers().size()+"] " + user.getNickname() + ": " + msg);
 		});
 		
 		server.onPrivateMessage(event ->
@@ -46,7 +59,7 @@ public class TestIRCBot
 			User user = event.getUser();
 			String msg = event.getMessage();
 			
-			System.out.println("PM:   " + user.getNickname() + ": " + msg);
+			System.out.println("PM:   " + user + ": " + msg);
 		});
 	}
 }
