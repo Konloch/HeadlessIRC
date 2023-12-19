@@ -4,6 +4,7 @@ import com.konloch.ircbot.listener.IRCJoin;
 import com.konloch.ircbot.listener.IRCLeave;
 import com.konloch.ircbot.listener.IRCChannelMessage;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -29,52 +30,29 @@ public class Channel
 		this.name = name;
 	}
 	
-	public void process()
+	public void process() throws IOException
 	{
-		try
+		//rejoin channel after 5 seconds from initial attempt
+		if (!isJoined() && System.currentTimeMillis() - getLastJoinAttempt() >= 5000)
 		{
-			//rejoin channel after 5 seconds from initial attempt
-			if (!isJoined() && System.currentTimeMillis() - getLastJoinAttempt() >= 5000)
-			{
-				setLastJoinAttempt(System.currentTimeMillis());
-				
-				//join a channel
-				server.send("JOIN " + getName());
-			}
+			setLastJoinAttempt(System.currentTimeMillis());
 			
-			//send any queued messages
-			if (isJoined())
-			{
-				//send private messages
-				for (User user : getUsers())
-				{
-					if (user.getMessageQueue().isEmpty())
-						continue;
-					
-					for (int i = 0; i < 5; i++)
-					{
-						if (user.getMessageQueue().isEmpty())
-							break;
-						
-						String message = user.getMessageQueue().poll();
-						server.send("PRIVMSG " + user.getNickname() + " :" + message);
-					}
-				}
-				
-				//send channel messages
-				for (int i = 0; i < 5; i++)
-				{
-					if (getMessageQueue().isEmpty())
-						break;
-					
-					String message = getMessageQueue().poll();
-					server.send("PRIVMSG " + getNameIRCProtocol() + " :" + message);
-				}
-			}
+			//join a channel
+			server.send("JOIN " + getName());
 		}
-		catch (Exception e)
+		
+		//send any queued messages
+		if (isJoined())
 		{
-			e.printStackTrace();
+			//send channel messages
+			for (int i = 0; i < 5; i++)
+			{
+				if (getMessageQueue().isEmpty())
+					break;
+				
+				String message = getMessageQueue().poll();
+				server.send("PRIVMSG " + getNameIRCProtocol() + " :" + message);
+			}
 		}
 	}
 	
@@ -88,7 +66,7 @@ public class Channel
 		if(user != null)
 			return user;
 		
-		user = new User(server, nickname);
+		user = server.getUser(nickname);
 		users.add(user);
 		return user;
 	}
@@ -226,5 +204,11 @@ public class Channel
 	public void setLastJoinAttempt(long lastJoinAttempt)
 	{
 		this.lastJoinAttempt = lastJoinAttempt;
+	}
+	
+	@Override
+	public String toString()
+	{
+		return server + "/" + getName();
 	}
 }

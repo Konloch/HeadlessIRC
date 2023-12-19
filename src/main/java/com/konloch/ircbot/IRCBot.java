@@ -7,6 +7,7 @@ import com.konloch.ircbot.listener.IRCPrivateMessage;
 import com.konloch.ircbot.server.Listeners;
 import com.konloch.ircbot.server.Server;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class IRCBot
 				{
 					Thread.sleep(1);
 					
+					//process each server message queue
 					servers.forEach(Server::process);
 				}
 				catch (Exception e)

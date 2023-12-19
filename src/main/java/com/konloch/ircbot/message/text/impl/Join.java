@@ -19,7 +19,7 @@ public class Join implements TextMessageEvent
 		String nickname = split(splitPartMessage[0].substring(1), "!", 2)[0];
 		String channelName = splitPartMessage[2];
 		
-		Channel channel = server.get(channelName);
+		Channel channel = server.getChannel(channelName);
 		
 		if (channel != null)
 		{

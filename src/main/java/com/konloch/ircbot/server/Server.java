@@ -1,10 +1,7 @@
 package com.konloch.ircbot.server;
 
 import com.konloch.ircbot.IRCBot;
-import com.konloch.ircbot.listener.IRCJoin;
-import com.konloch.ircbot.listener.IRCLeave;
-import com.konloch.ircbot.listener.IRCPrivateMessage;
-import com.konloch.ircbot.listener.IRCChannelMessage;
+import com.konloch.ircbot.listener.*;
 import com.konloch.ircbot.message.integer.IntegerMessage;
 import com.konloch.ircbot.message.text.TextMessage;
 
@@ -18,10 +15,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.konloch.util.FastStringUtils.split;
@@ -38,43 +32,80 @@ public class Server implements Runnable
 	private static final Pattern LINE_SPLITTER = Pattern.compile("\\r?\\n");
 	
 	private final IRCBot bot;
-	private final String server;
+	private final String serverAddress;
 	private final int port;
 	private boolean active = true;
+	private boolean encounteredError;
 	
 	private Selector selector;
 	private SocketChannel socketChannel;
 	
-	private final List<Channel> channels = new ArrayList<>();
+	private final Map<String,Channel> channels = new HashMap<>();
+	private final Map<String,User> users = new HashMap<>();
+	private final Object USER_LOCK = new Object();
 	
-	public Server(IRCBot bot, String server, int port)
+	public Server(IRCBot bot, String serverAddress, int port)
 	{
 		this.bot = bot;
-		this.server = server;
+		this.serverAddress = serverAddress;
 		this.port = port;
 	}
 	
 	public Channel join(String channelName)
 	{
 		Channel channel = new Channel(this, channelName);
-		channels.add(channel);
+		channels.put(channelName, channel);
 		return channel;
 	}
 	
 	public void process()
+	{
+		try
+		{
+			internalProcess();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			
+			encounteredError = true; //trip error flag
+		}
+	}
+	
+	private void internalProcess() throws IOException
 	{
 		//wait till connected
 		if(socketChannel == null || socketChannel.isConnectionPending() || !socketChannel.isConnected())
 			return;
 		
 		//remove any non-active channels
-		channels.removeIf(channel -> !channel.isActive());
+		channels.values().removeIf(channel -> !channel.isActive());
 		
 		//process all channels
-		for(Channel channel : channels)
+		for(Channel channel : channels.values())
 		{
 			channel.process();
 		}
+		
+		synchronized (USER_LOCK)
+		{
+			//process all private messages
+			for (User user : users.values())
+			{
+				if (user.getMessageQueue().isEmpty())
+					continue;
+				
+				for (int i = 0; i < 5; i++)
+				{
+					if (user.getMessageQueue().isEmpty())
+						break;
+					
+					String message = user.getMessageQueue().poll();
+					send("PRIVMSG " + user.getNickname() + " :" + message);
+				}
+			}
+		}
+		
 	}
 	
 	@Override
@@ -84,14 +115,15 @@ public class Server implements Runnable
 		{
 			try
 			{
+				encounteredError = false; //reset error flag
 				selector = Selector.open();
 				
 				socketChannel = SocketChannel.open();
 				socketChannel.configureBlocking(false);
-				socketChannel.connect(new InetSocketAddress(server, port));
+				socketChannel.connect(new InetSocketAddress(serverAddress, port));
 				socketChannel.register(selector, SelectionKey.OP_CONNECT);
 				
-				while (active)
+				while (!encounteredError)
 				{
 					selector.select();
 					
@@ -117,6 +149,9 @@ public class Server implements Runnable
 			finally
 			{
 				close();
+				
+				//call on listener event
+				bot.getListeners().callOnConnectionLost(this);
 			}
 		}
 	}
@@ -131,6 +166,9 @@ public class Server implements Runnable
 		//send NICK and USER commands to identify with the IRC server
 		send("NICK " + bot.getNickname());
 		send("USER " + bot.getNickname() + " 8 * :" + bot.getClient());
+		
+		//call on listener event
+		bot.getListeners().callOnConnectionEstablished(this);
 	}
 	
 	private void read() throws IOException
@@ -238,17 +276,36 @@ public class Server implements Runnable
 		}
 	}
 	
-	public Channel get(String channelName)
+	public Channel getChannel(String channelName)
 	{
 		if(channelName.startsWith(":"))
 			channelName = channelName.substring(1);
 		
-		for(Channel r : channels)
-			if(r.getName().equalsIgnoreCase(channelName) ||
-					r.getName().equalsIgnoreCase("#" + channelName))
-				return r;
+		Channel channel = channels.get(channelName);
 		
-		return null;
+		if(channel != null)
+			return channel;
+		
+		channel = channels.get("#" + channelName);
+		
+		return channel;
+	}
+	
+	public User getUser(String nickname)
+	{
+		User user = users.get(nickname);
+		
+		if(user == null)
+		{
+			user = new User(this, nickname);
+			
+			synchronized (USER_LOCK)
+			{
+				users.put(nickname, user);
+			}
+		}
+		
+		return user;
 	}
 	
 	public void onJoin(IRCJoin join)
@@ -260,6 +317,30 @@ public class Server implements Runnable
 				return;
 			
 			join.join(event);
+		});
+	}
+	
+	public void onConnectionEstablished(IRCConnectionEstablished established)
+	{
+		//filter listener events to only call for this server
+		bot.getListeners().onConnectionEstablished(event ->
+		{
+			if(event.getServer() != this)
+				return;
+			
+			established.established(event);
+		});
+	}
+	
+	public void onConnectionLost(IRCConnectionLost lost)
+	{
+		//filter listener events to only call for this server
+		bot.getListeners().onConnectionLost(event ->
+		{
+			if(event.getServer() != this)
+				return;
+			
+			lost.lost(event);
 		});
 	}
 	
@@ -299,13 +380,29 @@ public class Server implements Runnable
 		});
 	}
 	
-	public List<Channel> getChannels()
-	{
-		return channels;
-	}
-	
 	public IRCBot getBot()
 	{
 		return bot;
+	}
+	
+	public String getServerAddress()
+	{
+		return serverAddress;
+	}
+	
+	public Collection<Channel> getChannels()
+	{
+		return channels.values();
+	}
+	
+	public Collection<User> getUsers()
+	{
+		return users.values();
+	}
+	
+	@Override
+	public String toString()
+	{
+		return getServerAddress();
 	}
 }

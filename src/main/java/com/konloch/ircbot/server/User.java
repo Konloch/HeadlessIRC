@@ -13,7 +13,7 @@ public class User
 	private final String nickname;
 	private final Queue<String> messageQueue = new LinkedList<>();
 	
-	public User(Server server, String nickname)
+	protected User(Server server, String nickname)
 	{
 		this.server = server;
 		this.nickname = nickname;
@@ -42,5 +42,11 @@ public class User
 	public boolean isSelfBot()
 	{
 		return nickname.equals(server.getBot().getNickname());
+	}
+	
+	@Override
+	public String toString()
+	{
+		return server + "/" + nickname;
 	}
 }

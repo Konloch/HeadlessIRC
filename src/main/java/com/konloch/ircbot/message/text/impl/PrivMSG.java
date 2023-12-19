@@ -5,8 +5,6 @@ import com.konloch.ircbot.server.Channel;
 import com.konloch.ircbot.server.Server;
 import com.konloch.ircbot.server.User;
 
-import java.util.Arrays;
-
 import static com.konloch.util.FastStringUtils.split;
 
 /**
@@ -26,7 +24,7 @@ public class PrivMSG implements TextMessageEvent
 		{
 			if (location.startsWith("#"))
 			{
-				Channel channel = server.get(location);
+				Channel channel = server.getChannel(location);
 				
 				if (channel != null)
 				{
@@ -34,10 +32,8 @@ public class PrivMSG implements TextMessageEvent
 					
 					User user = channel.get(nickname);
 					
-					//create a temporary user object if we can't retrieve it from the name list
-					//TODO not entirely sure why this is happening, the RPL_NAMEPLY should handle this for us
 					if (user == null)
-						user = new User(server, nickname);
+						user = server.getUser(nickname);
 					
 					//call on listener event
 					server.getBot().getListeners().callChannelMessage(channel, user, msg);
@@ -45,8 +41,8 @@ public class PrivMSG implements TextMessageEvent
 			}
 			else
 			{
-				//create new user object
-				User user = new User(server, nickname);
+				//load the user object
+				User user = server.getUser(nickname);
 				
 				//call on listener event
 				server.getBot().getListeners().callPrivateMessage(user, msg);

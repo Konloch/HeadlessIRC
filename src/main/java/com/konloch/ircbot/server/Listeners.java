@@ -1,10 +1,8 @@
 package com.konloch.ircbot.server;
 
-import com.konloch.ircbot.listener.IRCJoin;
-import com.konloch.ircbot.listener.IRCLeave;
-import com.konloch.ircbot.listener.IRCPrivateMessage;
-import com.konloch.ircbot.listener.IRCChannelMessage;
+import com.konloch.ircbot.listener.*;
 import com.konloch.ircbot.listener.event.GenericChannelEvent;
+import com.konloch.ircbot.listener.event.GenericServerEvent;
 import com.konloch.ircbot.listener.event.PrivateMessageEvent;
 import com.konloch.ircbot.listener.event.ChannelMessageEvent;
 
@@ -16,33 +14,63 @@ import java.util.ArrayList;
  */
 public class Listeners
 {
+	private final ArrayList<IRCConnectionEstablished> onConnectionEstablished = new ArrayList<>();
+	private final ArrayList<IRCConnectionLost> onConnectionLost = new ArrayList<>();
 	private final ArrayList<IRCJoin> onJoin = new ArrayList<>();
 	private final ArrayList<IRCLeave> onLeave = new ArrayList<>();
 	private final ArrayList<IRCChannelMessage> channelMessages = new ArrayList<>();
 	private final ArrayList<IRCPrivateMessage> privateMessages = new ArrayList<>();
 	
+	public void callOnConnectionEstablished(Server server)
+	{
+		GenericServerEvent event = new GenericServerEvent(server);
+		for(IRCConnectionEstablished listener : onConnectionEstablished)
+			listener.established(event);
+	}
+	
+	public void callOnConnectionLost(Server server)
+	{
+		GenericServerEvent event = new GenericServerEvent(server);
+		for(IRCConnectionLost listener : onConnectionLost)
+			listener.lost(event);
+	}
+	
 	public void callOnJoin(Channel channel, User user)
 	{
-		for(IRCJoin event : onJoin)
-			event.join(new GenericChannelEvent(channel.getServer(), channel, user));
+		GenericChannelEvent event = new GenericChannelEvent(channel.getServer(), channel, user);
+		for(IRCJoin listener : onJoin)
+			listener.join(event);
 	}
 	
 	public void callOnLeave(Channel channel, User user)
 	{
-		for(IRCLeave event : onLeave)
-			event.leave(new GenericChannelEvent(channel.getServer(), channel, user));
+		GenericChannelEvent event = new GenericChannelEvent(channel.getServer(), channel, user);
+		for(IRCLeave listener : onLeave)
+			listener.leave(event);
 	}
 	
 	public void callChannelMessage(Channel channel, User user, String message)
 	{
-		for(IRCChannelMessage event : channelMessages)
-			event.message(new ChannelMessageEvent(channel.getServer(), channel, user, message));
+		ChannelMessageEvent event = new ChannelMessageEvent(channel.getServer(), channel, user, message);
+		for(IRCChannelMessage listener : channelMessages)
+			listener.message(event);
 	}
 	
 	public void callPrivateMessage(User user, String message)
 	{
-		for(IRCPrivateMessage event : privateMessages)
-			event.message(new PrivateMessageEvent(user.getServer(), user, message));
+		PrivateMessageEvent event = new PrivateMessageEvent(user.getServer(), user, message);
+		for(IRCPrivateMessage listener : privateMessages)
+			listener.message(event);
+	}
+	
+	public void onConnectionEstablished(IRCConnectionEstablished established)
+	{
+		onConnectionEstablished.add(established);
+	}
+	
+	public void onConnectionLost(IRCConnectionLost lost)
+	{
+		onConnectionLost.add(lost);
 	}
 	
 	public void onJoin(IRCJoin join)
@@ -63,6 +91,16 @@ public class Listeners
 	public void onPrivateMessage(IRCPrivateMessage leave)
 	{
 		privateMessages.add(leave);
+	}
+	
+	public ArrayList<IRCConnectionEstablished> getOnConnectionEstablished()
+	{
+		return onConnectionEstablished;
+	}
+	
+	public ArrayList<IRCConnectionLost> getOnConnectionLost()
+	{
+		return onConnectionLost;
 	}
 	
 	public ArrayList<IRCJoin> getOnJoin()
