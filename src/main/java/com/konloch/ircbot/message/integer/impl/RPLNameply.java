@@ -18,7 +18,7 @@ public class RPLNameply implements IntegerMessageEvent
 	@Override
 	public void handle(Server server, String[] splitPartMessage)
 	{
-		if(splitPartMessage.length <= 3)
+		if(splitPartMessage.length <= 4)
 		{
 			//TODO figure out what's going on here when we get a chance
 			System.err.println("ERROR: " + Arrays.toString(splitPartMessage));
