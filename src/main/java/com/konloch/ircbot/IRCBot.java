@@ -5,7 +5,6 @@ import com.konloch.ircbot.server.Listeners;
 import com.konloch.ircbot.server.Server;
 import com.konloch.util.FastStringUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +86,16 @@ public class IRCBot
 		getListeners().onLeave(leave);
 	}
 	
+	public void onSeverMessage(IRCServerMessage message)
+	{
+		getListeners().onServerMessage(message);
+	}
+	
+	public void onOutboundMessage(IRCOutboundMessage message)
+	{
+		getListeners().onOutboundMessage(message);
+	}
+	
 	public void onChannelMessage(IRCChannelMessage message)
 	{
 		getListeners().onChannelMessage(message);
@@ -95,6 +104,11 @@ public class IRCBot
 	public void onPrivateMessage(IRCPrivateMessage message)
 	{
 		getListeners().onPrivateMessage(message);
+	}
+	
+	public void setActive(boolean active)
+	{
+		this.active = active;
 	}
 	
 	public boolean isActive()
@@ -110,6 +124,8 @@ public class IRCBot
 	public void setNickname(String nickname)
 	{
 		this.nickname = nickname;
+		
+		//TODO queue network event
 	}
 	
 	public String getClient()
