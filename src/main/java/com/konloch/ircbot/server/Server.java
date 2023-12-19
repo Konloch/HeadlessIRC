@@ -191,12 +191,12 @@ public class Server implements Runnable
 				if(messageLower.isEmpty())
 					continue;
 				
-				if(bot.isDebug())
-					System.out.println("IN:  " + message);
+				boolean handled = false;
 				
 				//respond to PING with PONG
 				if (messageLower.startsWith("ping"))
 				{
+					handled = true;
 					send("PONG " + message.substring(5));
 				}
 				
@@ -215,15 +215,15 @@ public class Server implements Runnable
 						{
 							int opcode = Integer.parseInt(splitPartMessage[1]);
 							
-							if(bot.isDebug())
-								System.out.println("OP:  " + opcode);
-							
 							//look up the integer message
 							IntegerMessage intMsg = IntegerMessage.opcode(opcode);
 							
 							//process the message
 							if(intMsg != null)
+							{
 								intMsg.getEvent().handle(this, splitPartMessage);
+								handled = true;
+							}
 						}
 						
 						//handle text based commands
@@ -237,10 +237,16 @@ public class Server implements Runnable
 							
 							//process the message
 							if(textMsg != null)
+							{
 								textMsg.getEvent().handle(this, splitPartMessage);
+								handled = true;
+							}
 						}
 					}
 				}
+				
+				//call on the global event listeners
+				getBot().getListeners().callServerMessage(this, message, handled);
 			}
 			catch (Exception e)
 			{
@@ -253,8 +259,8 @@ public class Server implements Runnable
 	
 	public void send(String message) throws IOException
 	{
-		if(bot.isDebug())
-			System.out.println("OUT: " + message);
+		//call on the global event listeners
+		getBot().getListeners().callOutboundMessage(this, message, true);
 		
 		String formattedMessage = message + "\r\n";
 		ByteBuffer buffer = ENCODER.encode(CharBuffer.wrap(formattedMessage));
@@ -353,6 +359,30 @@ public class Server implements Runnable
 				return;
 			
 			leave.leave(event);
+		});
+	}
+	
+	public void onServerMessage(IRCServerMessage message)
+	{
+		//filter listener events to only call for this server
+		bot.getListeners().onServerMessage(event ->
+		{
+			if(event.getServer() != this)
+				return;
+			
+			message.message(event);
+		});
+	}
+	
+	public void onOutboundMessage(IRCServerMessage message)
+	{
+		//filter listener events to only call for this server
+		bot.getListeners().onOutboundMessage(event ->
+		{
+			if(event.getServer() != this)
+				return;
+			
+			message.message(event);
 		});
 	}
 	

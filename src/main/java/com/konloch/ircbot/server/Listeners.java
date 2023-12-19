@@ -1,10 +1,7 @@
 package com.konloch.ircbot.server;
 
 import com.konloch.ircbot.listener.*;
-import com.konloch.ircbot.listener.event.GenericChannelEvent;
-import com.konloch.ircbot.listener.event.GenericServerEvent;
-import com.konloch.ircbot.listener.event.PrivateMessageEvent;
-import com.konloch.ircbot.listener.event.ChannelMessageEvent;
+import com.konloch.ircbot.listener.event.*;
 
 import java.util.ArrayList;
 
@@ -18,6 +15,8 @@ public class Listeners
 	private final ArrayList<IRCConnectionLost> onConnectionLost = new ArrayList<>();
 	private final ArrayList<IRCJoin> onJoin = new ArrayList<>();
 	private final ArrayList<IRCLeave> onLeave = new ArrayList<>();
+	private final ArrayList<IRCServerMessage> serverMessages = new ArrayList<>();
+	private final ArrayList<IRCOutboundMessage> outboundMessages = new ArrayList<>();
 	private final ArrayList<IRCChannelMessage> channelMessages = new ArrayList<>();
 	private final ArrayList<IRCPrivateMessage> privateMessages = new ArrayList<>();
 	
@@ -47,6 +46,20 @@ public class Listeners
 		GenericChannelEvent event = new GenericChannelEvent(channel.getServer(), channel, user);
 		for(IRCLeave listener : onLeave)
 			listener.leave(event);
+	}
+	
+	public void callServerMessage(Server server, String message, boolean handled)
+	{
+		ServerMessageEvent event = new ServerMessageEvent(server, message, handled);
+		for(IRCServerMessage listener : serverMessages)
+			listener.message(event);
+	}
+	
+	public void callOutboundMessage(Server server, String message, boolean handled)
+	{
+		ServerMessageEvent event = new ServerMessageEvent(server, message, handled);
+		for(IRCOutboundMessage listener : outboundMessages)
+			listener.message(event);
 	}
 	
 	public void callChannelMessage(Channel channel, User user, String message)
@@ -83,14 +96,24 @@ public class Listeners
 		onLeave.add(leave);
 	}
 	
-	public void onChannelMessage(IRCChannelMessage leave)
+	public void onServerMessage(IRCServerMessage message)
 	{
-		channelMessages.add(leave);
+		serverMessages.add(message);
 	}
 	
-	public void onPrivateMessage(IRCPrivateMessage leave)
+	public void onOutboundMessage(IRCOutboundMessage message)
 	{
-		privateMessages.add(leave);
+		outboundMessages.add(message);
+	}
+	
+	public void onChannelMessage(IRCChannelMessage message)
+	{
+		channelMessages.add(message);
+	}
+	
+	public void onPrivateMessage(IRCPrivateMessage message)
+	{
+		privateMessages.add(message);
 	}
 	
 	public ArrayList<IRCConnectionEstablished> getOnConnectionEstablished()
@@ -111,6 +134,16 @@ public class Listeners
 	public ArrayList<IRCLeave> getOnLeave()
 	{
 		return onLeave;
+	}
+	
+	public ArrayList<IRCServerMessage> getServerMessages()
+	{
+		return serverMessages;
+	}
+	
+	public ArrayList<IRCOutboundMessage> getOutboundMessages()
+	{
+		return outboundMessages;
 	}
 	
 	public ArrayList<IRCChannelMessage> getChannelMessages()

@@ -3,6 +3,7 @@ package com.konloch.ircbot;
 import com.konloch.ircbot.listener.*;
 import com.konloch.ircbot.server.Listeners;
 import com.konloch.ircbot.server.Server;
+import com.konloch.util.FastStringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ public class IRCBot
 	private boolean active = true;
 	private String nickname;
 	private String client;
-	private boolean debug = false;
 	private final List<Server> servers = new ArrayList<>();
 	private final Listeners listeners = new Listeners();
 	
@@ -51,7 +51,7 @@ public class IRCBot
 		
 		if(serverAddress.contains(":"))
 		{
-			String[] split = serverAddress.split(":", 2);
+			String[] split = FastStringUtils.split(serverAddress, ":", 2);
 			port = Integer.parseInt(split[1]);
 			serverAddress = split[0];
 		}
@@ -97,11 +97,6 @@ public class IRCBot
 		getListeners().onPrivateMessage(message);
 	}
 	
-	public boolean isDebug()
-	{
-		return debug;
-	}
-	
 	public boolean isActive()
 	{
 		return active;
@@ -110,6 +105,11 @@ public class IRCBot
 	public String getNickname()
 	{
 		return nickname;
+	}
+	
+	public void setNickname(String nickname)
+	{
+		this.nickname = nickname;
 	}
 	
 	public String getClient()

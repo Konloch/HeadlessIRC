@@ -15,6 +15,19 @@ public class TestIRCBot
 		Server server = bot.join("irc.freenode.net");
 		
 		Channel joinedChannel = server.join("#test-channel-1");
+		boolean debug = false; //enable true for each event to be debugged
+		
+		server.onServerMessage(event ->
+		{
+			if(debug)
+				System.out.println("IN:  " + event.getMessage());
+		});
+		
+		server.onOutboundMessage(event ->
+		{
+			if(debug)
+				System.out.println("OUT:  " + event.getMessage());
+		});
 		
 		server.onConnectionEstablished(event ->
 		{
